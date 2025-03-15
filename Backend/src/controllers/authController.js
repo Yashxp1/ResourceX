@@ -3,7 +3,7 @@ import { generateToken } from '../lib/token.js';
 import bcrypt from 'bcrypt';
 import User from '../models/user.model.js';
 
-const signup = async (req, res) => {
+export const signup = async (req, res) => {
   const { name, email, password } = req.body;
   try {
     if (!name || !email || !password) {
@@ -15,7 +15,7 @@ const signup = async (req, res) => {
     if (password.length < 6) {
       return res.status(401).json({
         success: false,
-        message: 'You password must have more than 9 characters',
+        message: 'You password must have more than 6 characters',
       });
     }
 
@@ -53,8 +53,8 @@ const signup = async (req, res) => {
   }
 };
 
-const login = async (req, res) => {
-  const { user, email } = req.body;
+export const login = async (req, res) => {
+  const { email, password } = req.body;
 
   try {
     const user = await User.findOne({ email });
@@ -80,9 +80,18 @@ const login = async (req, res) => {
       email: user.email,
       message: 'SUCCESS',
     });
-    
   } catch (error) {
     console.log('Error in login controller', error);
+    return res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    res.cookie('jwt', '', { maxAge: 0 });
+    res.status(200).json({ message: 'Logged out successfully' });
+  } catch (error) {
+    console.log('Error in logout controller', error);
     return res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
