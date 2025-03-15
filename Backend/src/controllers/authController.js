@@ -1,4 +1,3 @@
-import express from 'express';
 import { generateToken } from '../lib/token.js';
 import bcrypt from 'bcrypt';
 import User from '../models/user.model.js';
@@ -15,7 +14,7 @@ export const signup = async (req, res) => {
     if (password.length < 6) {
       return res.status(401).json({
         success: false,
-        message: 'You password must have more than 6 characters',
+        message: 'Your password must have more than 6 characters',
       });
     }
 
