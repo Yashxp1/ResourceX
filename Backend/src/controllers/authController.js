@@ -42,10 +42,10 @@ const signup = async (req, res) => {
         _id: newUser._id,
         name: newUser.name,
         email: newUser.email,
-        message: "SUCCESS"
+        message: 'SUCCESS',
       });
     } else {
-      res.status(400).json({ success: false ,message: 'Invalid user data' });
+      res.status(400).json({ success: false, message: 'Invalid user data' });
     }
   } catch (error) {
     console.log('Error in signup controller', error);
@@ -53,6 +53,36 @@ const signup = async (req, res) => {
   }
 };
 
-const login = async (req,res) => {
+const login = async (req, res) => {
+  const { user, email } = req.body;
 
-}
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid credentials' });
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      return res
+        .status(401)
+        .json({ success: false, message: 'Invalid credentials' });
+    }
+
+    generateToken(user._id, res);
+
+    res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      message: 'SUCCESS',
+    });
+    
+  } catch (error) {
+    console.log('Error in login controller', error);
+    return res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
