@@ -1,3 +1,58 @@
-import express from 'express'
+import express from 'express';
+import { generateToken } from '../lib/token.js';
+import bcrypt from 'bcrypt';
+import User from '../models/user.model.js';
 
+const signup = async (req, res) => {
+  const { name, email, password } = req.body;
+  try {
+    if (!name || !email || !password) {
+      return res
+        .status(401)
+        .json({ success: false, message: 'Fill all the details' });
+    }
 
+    if (password.length < 6) {
+      return res.status(401).json({
+        success: false,
+        message: 'You password must have more than 9 characters',
+      });
+    }
+
+    const user = await User.findOne({ email });
+    if (user)
+      return res
+        .status(400)
+        .json({ success: false, message: 'User already exists ' });
+
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(password, salt);
+
+    const newUser = new User({
+      name,
+      email,
+      password: hashPassword,
+    });
+
+    if (newUser) {
+      generateToken(newUser._id, res);
+      await newUser.save();
+
+      res.status(201).json({
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        message: "SUCCESS"
+      });
+    } else {
+      res.status(400).json({ success: false ,message: 'Invalid user data' });
+    }
+  } catch (error) {
+    console.log('Error in signup controller', error);
+    return res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+const login = async (req,res) => {
+
+}
