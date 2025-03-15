@@ -94,3 +94,35 @@ export const logout = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const getUsers = await User.find({});
+    return res.status(200).json({ success: true, users: getUsers });
+  } catch (error) {
+    console.log('Error in get all users controller', error);
+    return res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+export const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json({
+      success: true,
+      id: user._id,
+      name: user.name,
+      email: user.email,
+    });
+  } catch (error) {
+    console.error('Error in get user by id', error);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
